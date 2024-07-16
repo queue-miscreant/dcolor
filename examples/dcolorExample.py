@@ -3,4 +3,3 @@ import example
 
 dc = DColor()
 example.example(dc)
-
