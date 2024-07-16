@@ -1,7 +1,5 @@
-import numpy as np
-import sys
-sys.path.append('..')
-import rgbcolor
-dc = rgbcolor.DColor()
+from dcolor import DColorRGB
 import example
+
+dc = DColorRGB()
 example.example(dc)

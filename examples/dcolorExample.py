@@ -1,8 +1,6 @@
-import numpy as np
-import sys
-sys.path.append('..')
-import dcolor
-dc = dcolor.DColor()
+from dcolor import DColor
 import example
+
+dc = DColor()
 example.example(dc)
 
