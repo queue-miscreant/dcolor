@@ -1,7 +1,5 @@
-import numpy as np
-import sys
-sys.path.append('..')
-import hsvcolor
-dc = hsvcolor.DColor()
+from dcolor import DColorHSV
 import example
+
+dc = DColorHSV()
 example.example(dc)
