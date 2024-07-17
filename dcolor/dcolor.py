@@ -8,7 +8,7 @@ from matplotlib.colors import hsv_to_rgb
 
 
 class DColor:
-    def __init__(self, samples=1000, xmin=-8, xmax=8, ymin=-8, ymax=8):
+    def __init__(self, samples=1000, xmin=-8.0, xmax=8.0, ymin=-8.0, ymax=8.0):
         mpl.rcParams["toolbar"] = "None"
         self._samples = samples
         # axes
@@ -55,13 +55,10 @@ class DColor:
 
         fig = plt.figure(figsize=(xdim, ydim), dpi=plt_dpi)
         ax = fig.gca()
-        val = str("x xmin=")
-        val = val + str(self._xmin) + " xmax=" + str(self._xmax)
-        ax.set_xlabel(val)
-        val = str("y ymin=")
-        val = val + str(self._ymin) + " xmax=" + str(self._ymax)
-        ax.set_ylabel(val)
-        ax.imshow(rgb)
+        ax.imshow(rgb, extent=(self._xmin, self._xmax, self._ymax, self._ymin))  # y extents backwards for inverted y axis
+        ax.axhline(y=0, color='k')
+        ax.axvline(x=0, color='k')
+        ax.grid(True, which='both', linestyle="dashed")
         ax.invert_yaxis()  # make CCW orientation positive
         ax.get_xaxis().set_visible(True)
         ax.get_yaxis().set_visible(True)
