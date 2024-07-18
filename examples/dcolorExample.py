@@ -1,5 +1,5 @@
-from dcolor import DColor
+from dcolor import DColor, magnitude_oscillating
 import example
 
 dc = DColor()
-example.example(dc)
+example.example(dc, color_map=magnitude_oscillating)

@@ -1,5 +1,5 @@
-from dcolor import DColorHSV
+from dcolor import DColor, raw_magnitude_oscillating
 import example
 
-dc = DColorHSV()
-example.example(dc)
+dc = DColor()
+example.example(dc, color_map=raw_magnitude_oscillating)
