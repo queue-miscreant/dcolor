@@ -1,3 +1,2 @@
 from .dcolor import DColor
-from .hsvcolor import DColor as DColorHSV
-from .rgbcolor import DColor as DColorRGB
+from .color_maps import magnitude_oscillating, raw_magnitude_oscillating, green_magnitude
