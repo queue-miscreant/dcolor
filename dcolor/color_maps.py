@@ -1,14 +1,28 @@
-import numpy as np
-from matplotlib.colors import hsv_to_rgb
+from typing import Callable, Literal
+from typing_extensions import TypeAlias, TypeAliasType
 
-def normalize(arr):
+from matplotlib.colors import hsv_to_rgb
+import numpy as np
+import numpy.typing as npt
+
+ComplexPlane = TypeAliasType(
+    "ComplexPlane", np.ndarray[Literal[2], np.dtype[np.complexfloating]]
+)  # 2D representation of the complex plane
+Image = TypeAliasType(
+    "Image", np.ndarray[Literal[3], np.dtype[np.floating]]
+)  # RGB image
+ComplexColorMap: TypeAlias = Callable[[ComplexPlane], Image]  # C -> [0, 1]^3
+
+
+def normalize(arr: npt.NDArray) -> npt.NDArray:
     """Used for normalizing data in array based on min/max values"""
     arrMin = np.min(arr)
     arrMax = np.max(arr)
     arr = arr - arrMin
     return arr / (arrMax - arrMin)
 
-def magnitude_oscillating(zz):
+
+def magnitude_oscillating(zz: ComplexPlane) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
 
@@ -16,14 +30,15 @@ def magnitude_oscillating(zz):
     Saturation and value covary with the logarithm of the magnitude of `zz`,
     effectively giving logarithmic countours.
     """
-    H = normalize(np.angle(zz) % (2.0 * np.pi))  # Hue determined by arg(z)
+    H = (np.angle(zz) % (2.0 * np.pi)) / (2.0 * np.pi)  # Hue determined by arg(z)
     r = np.log2(1.0 + np.abs(zz))
     S = (1.0 + np.abs(np.sin(2.0 * np.pi * r))) / 2.0
     V = (1.0 + np.abs(np.cos(2.0 * np.pi * r))) / 2.0
 
     return hsv_to_rgb(np.dstack((H, S, V)))
 
-def raw_magnitude_oscillating(zz):
+
+def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
     Similar to `magnitude_oscillating`, but with a "rawer" conversion to RGB.
@@ -83,7 +98,8 @@ def raw_magnitude_oscillating(zz):
 
     return np.stack([r, g, b], axis=-1)
 
-def green_magnitude(zz, expand=1.0):
+
+def green_magnitude(zz: ComplexPlane, expand=1.0) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
 
