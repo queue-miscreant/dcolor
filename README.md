@@ -20,7 +20,8 @@ git clone https://github.com/hernanat/dcolor.git
 
 ### New (`poetry`)
 
-Install [poetry](https://python-poetry.org/). Typically, this involves installing `pipx` followed by `pipx install poetry`.
+For development, first, install [poetry](https://python-poetry.org/).
+Typically, this involves installing `pipx` followed by `pipx install poetry`.
 Arch-based systems can also install the `python-poetry` package.
 
 Clone the repository and run `poetry install`.
@@ -29,6 +30,7 @@ This will install the project and its requirements to a clean virtual environmen
 ```bash
 git clone https://github.com/hernanat/dcolor.git
 poetry install
+poetry shell
 ```
 
 <!-- TODO 
@@ -36,9 +38,15 @@ Figuring out how to install this this more permanently is a hanging question.
 Poetry will let you build a wheel and tarball with `poetry build`, but getting this into PyPI would be better.
 -->
 
-## run example
+## Examples
 
-`python dcolorExample.py`
+Note that `python` commands in this section should be run inside the virtual environment.
+
+### Default
+
+```bash
+python dcolorExample.py
+```
 
 It generates a series of examples.
 When each image appears clicking the close button starts the next example.
@@ -50,33 +58,36 @@ dc.plot(lambda z : ((z**2-1)*(z-2- 1j)**2)/(z**2 +2+ 2j),
     title='((z**2-1)*(z-2- 1j)**2)/(z**2 +2+ 2j)')
 ```
 
-
 Which results in the following plot:
 
 ![dcolor example](images/dcolor.png)
 
-## hsvcolor
+### hsvcolor
 
 This is like dcolor except that it does not convert the HSV image to RGB
 
-`python hsvcolorExample.py`
+```bash
+python hsvcolorExample.py
+```
 
 Will create the images.
 The last image produces:
 
 ![hsvcolor example](images/hsvcolor.png)
 
-## rgbcolor
+### rgbcolor
 
 This is designed to show  the magnitude of abs(z).
 White means big, shades of green means intermediate, and black means small.
 
-`python rgbcolorExample.py`
+```bash
+python rgbcolorExample.py
+```
 
 Will create the images.
 The last image produces:
 
-![hsvcolor example](images/rgbcolor.png)
+![rgbcolor example](images/rgbcolor.png)
 
 
 ## Website and Documentation
