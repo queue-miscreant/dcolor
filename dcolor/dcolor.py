@@ -111,6 +111,19 @@ class _DColor:
         if grid:
             axes.grid(True, which="both", linestyle="dashed")
 
+        # Add callbacks for replotting on pans and zooms
+        axes.callbacks.connect("xlim_changed", lambda _: self._set_need_redraw())
+        axes.callbacks.connect("ylim_changed", lambda _: self._set_need_redraw())
+        if axes.figure is not None:
+            axes.figure.canvas.mpl_connect(
+                "button_release_event",
+                lambda _: self._need_redraw and self._plot(True)
+            )
+
+        # Callback for undo buttons
+        axes.add_callback(lambda _: self._plot(True))
+
+
 def plot(
     f: ComplexFunction,
     *,
@@ -136,7 +149,7 @@ def plot(
     `ylim` --       The y (imaginary) limits to use when plotting
 
     `cmap` --       A function which converts a complex number to an RGB color
-                    (or an array of the former to an array of the latter).
+                   (or an array of the former to an array of the latter).
                     The default is `dcolor.color_maps.magnitude_oscillating`
 
     `samples` --    The number of samples along each axis to use for plotting.
