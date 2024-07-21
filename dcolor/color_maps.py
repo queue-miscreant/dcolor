@@ -22,6 +22,29 @@ def normalize(arr: npt.NDArray) -> npt.NDArray:
     return arr / (arrMax - arrMin)
 
 
+def smoothing(t: npt.NDArray, scale: float):
+    """Nice bijection on [0,1] for weighing saturation and value contributions"""
+    return np.log(1 + t**scale * (np.e - 1))
+
+
+def domain_polezero(zz: ComplexPlane, scale: float = 0.2) -> Image:
+    """
+    Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
+
+    Hue is taken from the complex argument of `zz`.
+    Zeroes are colored black and poles are colored white.
+    """
+    mag = np.abs(zz)
+    low_magnitudes_black = smoothing(mag, scale=scale)
+    high_magnitudes_white = smoothing(1 / (np.finfo(mag.dtype).eps + mag), scale=scale)
+
+    H = (np.angle(zz) % (2.0 * np.pi)) / (2.0 * np.pi)  # Hue determined by arg(z)
+    S = high_magnitudes_white * (mag >= 1.0) + (mag < 1.0)
+    V = low_magnitudes_black * (mag < 1.0) + (mag >= 1.0)
+
+    return hsv_to_rgb(np.dstack((H, S, V)))
+
+
 def magnitude_oscillating(zz: ComplexPlane) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
@@ -99,7 +122,7 @@ def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
     return np.stack([r, g, b], axis=-1)
 
 
-def green_magnitude(zz: ComplexPlane, expand=1.0) -> Image:
+def green_magnitude(zz: ComplexPlane, expand: float = 1.0) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
 
