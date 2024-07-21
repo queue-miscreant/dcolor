@@ -89,6 +89,20 @@ The last image produces:
 
 ![rgbcolor example](images/rgbcolor.png)
 
+### Domain Pole/Zero
+
+A function similar to the default, but which does not oscillate, and plots
+values near poles as brighter and values near zeroes as darker.
+Decent for up to fifth-order zeroes.
+
+```bash
+python magExample.py
+```
+
+Will create the images.
+The last image produces:
+
+![domain_polezero example](images/domain_polezero.png)
 
 ## Website and Documentation
 
