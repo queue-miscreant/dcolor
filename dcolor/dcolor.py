@@ -46,8 +46,8 @@ class DColor:
         `f` --  The complex-valued function to plot. A callable which accepts numpy array of complex values.
 
         Optional keyword arguments:
-        `color_map` --  A function which converts a complex number to an RGB color
-                        (or an array of the former to an array of the latter).
+        `color_map` --  A function which converts the magnitude and argument of a complex number
+                        to an RGB value (or an array of the former two to an array of the last).
                         The default is `dcolor.color_maps.magnitude_oscillating`
 
         `grid` --       Whether or not to draw gridlines at the tick positions
@@ -58,12 +58,10 @@ class DColor:
 
         ax = plt.gca()
 
-        # Plot the image with y extents backwards
+        # Plot the image over the given bounds using the bottom-left as the origin of the image
         ax.imshow(rgb, origin="lower", extent=(self._xmin, self._xmax, self._ymin, self._ymax))
-        # make CCW orientation positive
-        # subsequent plots on the same axes will not be affected
-        # ax.invert_yaxis()
 
+        # Labels, axes, and ticks
         ax.set_xlabel("$\\Re$")
         ax.set_ylabel("$\\Im$")
         ax.axhline(y=0, color="k")

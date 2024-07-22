@@ -28,6 +28,43 @@ def smoothing(t: npt.NDArray, scale: float):
     return np.log(1 + t**scale * (np.e - 1))
 
 
+def overlay(a: Image, b: Image) -> Image:
+    """Multiply `a` for low `b` values and screen `a` for high `b` values"""
+    multiply = 2*a*b
+    screen = 1.0 - 2*(1.0 - b)*(1.0 - a)
+    filter_ = (b <= 0.5).astype(multiply.dtype)
+
+    return multiply * filter_ + screen * (1.0 - filter_)
+
+
+def generic(
+    mag: FloatArray,
+    arg: FloatArray,
+    mag_colormap: MPLColorMap = colormaps["gray"],
+    arg_colormap: MPLColorMap = colormaps["hsv"],
+    mag_premap: Callable[[FloatArray], FloatArray] = lambda x: (2.0 * np.arctan(x) / np.pi),
+    arg_premap: Callable[[FloatArray], FloatArray] = lambda x: (x / (2.0 * np.pi)),
+) -> Image:
+    """
+    Create a domain coloring image using a colormap from matplotlib.
+
+    Since colormaps range over [0, 1), but magnitude ranges over [0, oo) and
+    the argument ranges over [0, 2pi), these values are mapped by `mag_premap`
+    and `arg_premap` into the colormap space. By default, these are the
+    following maps:
+
+    mag |-> 2*arctan(mag) / pi
+    arg |-> arg / 2pi
+
+    Finally, the values are translated to images using the colormaps provided,
+    then blended together using `color_maps.overlay`.
+    """
+    colored_arg = arg_colormap(arg_premap(arg))
+    colored_mag = mag_colormap(mag_premap(mag))
+
+    return overlay(colored_arg[:,:,0:3], colored_mag[:,:,0:3])  # discard alpha
+
+
 def domain_polezero(mag: FloatArray, arg: FloatArray, scale: float = 0.2) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
