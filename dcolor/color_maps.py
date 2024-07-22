@@ -15,14 +15,6 @@ Image = TypeAliasType(
 ComplexColorMap = Callable[[FloatArray, FloatArray], Image]
 
 
-def normalize(arr: npt.NDArray) -> npt.NDArray:
-    """Used for normalizing data in array based on min/max values"""
-    arrMin = np.min(arr)
-    arrMax = np.max(arr)
-    arr = arr - arrMin
-    return arr / (arrMax - arrMin)
-
-
 def smoothing(t: npt.NDArray, scale: float):
     """Nice bijection on [0,1] for weighing saturation and value contributions"""
     return np.log(1 + t**scale * (np.e - 1))
@@ -65,21 +57,25 @@ def generic(
     return overlay(colored_arg[:,:,0:3], colored_mag[:,:,0:3])  # discard alpha
 
 
+def _domain_polezero_mag_premap(x: FloatArray, scale: float):
+    """Magnitude premap for `domain_polezero`"""
+    low_magnitudes_black = smoothing(x, scale=scale)
+    high_magnitudes_white = smoothing(1 / (np.finfo(x.dtype).eps + x), scale=scale)
+    return (low_magnitudes_black / 2.0) * (x < 1.0) + (1.0 - high_magnitudes_white / 2.0) * (x >= 1.0)
+
+
 def domain_polezero(mag: FloatArray, arg: FloatArray, scale: float = 0.2) -> Image:
     """
-    Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
+    Converts a complex 2D array `zz` to an RGB image with "typical" domain coloring.
 
     Hue is taken from the complex argument of `zz`.
-    Zeroes are colored black and poles are colored white.
+    Values near zeroes are colored darker and values near poles are colored brighter.
     """
-    low_magnitudes_black = smoothing(mag, scale=scale)
-    high_magnitudes_white = smoothing(1 / (np.finfo(mag.dtype).eps + mag), scale=scale)
-
-    H = arg / (2.0 * np.pi)
-    S = high_magnitudes_white * (mag >= 1.0) + (mag < 1.0)
-    V = low_magnitudes_black * (mag < 1.0) + (mag >= 1.0)
-
-    return hsv_to_rgb(np.dstack((H, S, V)))
+    return generic(
+        mag,
+        arg,
+        mag_premap=lambda x: _domain_polezero_mag_premap(x, scale=scale),
+    )
 
 
 # def magnitude_oscillating(zz: ComplexPlane) -> Image:
@@ -103,9 +99,6 @@ def raw_magnitude_oscillating(mag: FloatArray, arg: FloatArray) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
     Similar to `magnitude_oscillating`, but with a "rawer" conversion to RGB.
-
-    Generally similar to `magnitude_oscillating`, with R as hue,
-    G as saturation, and B as value.
     """
     h = arg / (2.0 * np.pi)  # Hue determined by arg(z)
     r = np.log2(1.0 + mag)
