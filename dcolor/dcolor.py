@@ -53,15 +53,16 @@ class DColor:
         `grid` --       Whether or not to draw gridlines at the tick positions
         """
         zz = f(self.makeDomain())
-        rgb = color_map(zz)
+        mag, arg = np.abs(zz), (np.angle(zz) % (2.0 * np.pi))
+        rgb = color_map(mag, arg)
 
         ax = plt.gca()
 
         # Plot the image with y extents backwards
-        ax.imshow(rgb, extent=(self._xmin, self._xmax, self._ymax, self._ymin))
+        ax.imshow(rgb, origin="lower", extent=(self._xmin, self._xmax, self._ymin, self._ymax))
         # make CCW orientation positive
         # subsequent plots on the same axes will not be affected
-        ax.invert_yaxis()
+        # ax.invert_yaxis()
 
         ax.set_xlabel("$\\Re$")
         ax.set_ylabel("$\\Im$")

@@ -1,17 +1,18 @@
 from typing import Callable, Literal
-from typing_extensions import TypeAlias, TypeAliasType
+from typing_extensions import TypeAliasType
 
-from matplotlib.colors import hsv_to_rgb
+from matplotlib import colormaps
+from matplotlib.colors import hsv_to_rgb, Colormap as MPLColorMap
 import numpy as np
 import numpy.typing as npt
 
-ComplexPlane = TypeAliasType(
-    "ComplexPlane", np.ndarray[Literal[2], np.dtype[np.complexfloating]]
-)  # 2D representation of the complex plane
+FloatArray = TypeAliasType(
+    "FloatArray", npt.NDArray[np.floating]
+)  # Array type after applying angle() or abs()
 Image = TypeAliasType(
     "Image", np.ndarray[Literal[3], np.dtype[np.floating]]
 )  # RGB image
-ComplexColorMap: TypeAlias = Callable[[ComplexPlane], Image]  # C -> [0, 1]^3
+ComplexColorMap = Callable[[FloatArray, FloatArray], Image]
 
 
 def normalize(arr: npt.NDArray) -> npt.NDArray:
@@ -27,25 +28,25 @@ def smoothing(t: npt.NDArray, scale: float):
     return np.log(1 + t**scale * (np.e - 1))
 
 
-def domain_polezero(zz: ComplexPlane, scale: float = 0.2) -> Image:
+def domain_polezero(mag: FloatArray, arg: FloatArray, scale: float = 0.2) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
 
     Hue is taken from the complex argument of `zz`.
     Zeroes are colored black and poles are colored white.
     """
-    mag = np.abs(zz)
     low_magnitudes_black = smoothing(mag, scale=scale)
     high_magnitudes_white = smoothing(1 / (np.finfo(mag.dtype).eps + mag), scale=scale)
 
-    H = (np.angle(zz) % (2.0 * np.pi)) / (2.0 * np.pi)  # Hue determined by arg(z)
+    H = arg / (2.0 * np.pi)
     S = high_magnitudes_white * (mag >= 1.0) + (mag < 1.0)
     V = low_magnitudes_black * (mag < 1.0) + (mag >= 1.0)
 
     return hsv_to_rgb(np.dstack((H, S, V)))
 
 
-def magnitude_oscillating(zz: ComplexPlane) -> Image:
+# def magnitude_oscillating(zz: ComplexPlane) -> Image:
+def magnitude_oscillating(mag: FloatArray, arg: FloatArray) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
 
@@ -53,15 +54,15 @@ def magnitude_oscillating(zz: ComplexPlane) -> Image:
     Saturation and value covary with the logarithm of the magnitude of `zz`,
     effectively giving logarithmic countours.
     """
-    H = (np.angle(zz) % (2.0 * np.pi)) / (2.0 * np.pi)  # Hue determined by arg(z)
-    r = np.log2(1.0 + np.abs(zz))
+    H = arg / (2.0 * np.pi)  # Hue determined by arg(z)
+    r = np.log2(1.0 + mag)
     S = (1.0 + np.abs(np.sin(2.0 * np.pi * r))) / 2.0
     V = (1.0 + np.abs(np.cos(2.0 * np.pi * r))) / 2.0
 
     return hsv_to_rgb(np.dstack((H, S, V)))
 
 
-def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
+def raw_magnitude_oscillating(mag: FloatArray, arg: FloatArray) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
     Similar to `magnitude_oscillating`, but with a "rawer" conversion to RGB.
@@ -69,8 +70,8 @@ def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
     Generally similar to `magnitude_oscillating`, with R as hue,
     G as saturation, and B as value.
     """
-    h = normalize(np.angle(zz) % (2.0 * np.pi))  # Hue determined by arg(z)
-    r = np.log2(1.0 + np.abs(zz))
+    h = arg / (2.0 * np.pi)  # Hue determined by arg(z)
+    r = np.log2(1.0 + mag)
     s = (1.0 + np.abs(np.sin(2.0 * np.pi * r))) / 2.0
     v = (1.0 + np.abs(np.cos(2.0 * np.pi * r))) / 2.0
 
@@ -122,7 +123,7 @@ def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
     return np.stack([r, g, b], axis=-1)
 
 
-def green_magnitude(zz: ComplexPlane, expand: float = 1.0) -> Image:
+def green_magnitude(mag: FloatArray, arg: FloatArray, expand: float = 1.0) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
 
@@ -130,10 +131,9 @@ def green_magnitude(zz: ComplexPlane, expand: float = 1.0) -> Image:
     between appear green.
     The rate at which this occurs is controlled by `expand`.
     """
-    absz = np.abs(zz)
-    r = absz * 0.5 / expand
-    g = absz * 1.00 / expand
-    b = absz * 0.5 / expand
+    r = mag * 0.5 / expand
+    g = mag * 1.00 / expand
+    b = mag * 0.5 / expand
     r = np.clip(r, 0, 1)
     g = np.clip(g, 0, 1)
     b = np.clip(b, 0, 1)
