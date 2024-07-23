@@ -29,32 +29,59 @@ def overlay(a: Image, b: Image) -> Image:
     return multiply * filter_ + screen * (1.0 - filter_)
 
 
-def generic(
-    mag: FloatArray,
-    arg: FloatArray,
-    mag_colormap: MPLColorMap = colormaps["gray"],
-    arg_colormap: MPLColorMap = colormaps["hsv"],
-    mag_premap: Callable[[FloatArray], FloatArray] = lambda x: (2.0 * np.arctan(x) / np.pi),
-    arg_premap: Callable[[FloatArray], FloatArray] = lambda x: (x / (2.0 * np.pi)),
-) -> Image:
+class GenericColorMap:
     """
-    Create a domain coloring image using a colormap from matplotlib.
+    Class for creating common domain coloring maps.
 
-    Since colormaps range over [0, 1), but magnitude ranges over [0, oo) and
-    the argument ranges over [0, 2pi), these values are mapped by `mag_premap`
-    and `arg_premap` into the colormap space. By default, these are the
-    following maps:
+    Since magnitude ranges over [0, oo) and argument (angle) ranges over [0, 2pi),
+    these values must be converted to range over [0, 1), the domain of Matplotlib
+    colormaps.
+    To do so, the functions specified by `mag_premap` and `arg_premap` are used.
+    By default, these are the following maps:
 
     mag |-> 2*arctan(mag) / pi
     arg |-> arg / 2pi
 
     Finally, the values are translated to images using the colormaps provided,
-    then blended together using `color_maps.overlay`.
+    then blended together by [overlaying](https://en.wikipedia.org/wiki/Blend_modes#Overlay)
+    the magnitude over the argument image.
     """
-    colored_arg = arg_colormap(arg_premap(arg))
-    colored_mag = mag_colormap(mag_premap(mag))
+    def __init__(
+        self,
+        mag_colormap: MPLColorMap = colormaps["gray"],
+        arg_colormap: MPLColorMap = colormaps["hsv"],
+        mag_premap: Callable[[FloatArray], FloatArray] = lambda x: (2.0 * np.arctan(x) / np.pi),
+        arg_premap: Callable[[FloatArray], FloatArray] = lambda x: (x / (2.0 * np.pi)),
+    ):
+        self.mag_colormap = mag_colormap
+        self.arg_colormap = arg_colormap
+        self.mag_premap = mag_premap
+        self.arg_premap = arg_premap
 
-    return overlay(colored_arg[:,:,0:3], colored_mag[:,:,0:3])  # discard alpha
+    def __call__(self, mag: FloatArray, arg: FloatArray):
+        """
+        Convert the magnitude and argument arrays provided to a single RGB image
+        """
+        colored_arg = self.arg_colormap(self.arg_premap(arg))
+        colored_mag = self.mag_colormap(self.mag_premap(mag))
+
+        return overlay(colored_arg[:,:,0:3], colored_mag[:,:,0:3])  # discard alpha
+
+class MagnitudeMap(GenericColorMap):
+    """
+    A GenericColormap which disregards its argument data
+    """
+    def __init__(
+        self,
+        mag_colormap: MPLColorMap = colormaps["inferno"],
+        mag_premap: Callable[[FloatArray], FloatArray] = lambda x: (2.0 * np.arctan(x) / np.pi),
+    ):
+        super().__init__(
+            mag_colormap = mag_colormap,
+            arg_colormap = colormaps["Greys"],
+            mag_premap = mag_premap,
+            arg_premap = lambda x: np.ones_like(x) * 0.5,
+        )
 
 
 def _domain_polezero_mag_premap(x: FloatArray, scale: float):
@@ -71,11 +98,9 @@ def domain_polezero(mag: FloatArray, arg: FloatArray, scale: float = 0.2) -> Ima
     Hue is taken from the complex argument of `zz`.
     Values near zeroes are colored darker and values near poles are colored brighter.
     """
-    return generic(
-        mag,
-        arg,
+    return GenericColorMap(
         mag_premap=lambda x: _domain_polezero_mag_premap(x, scale=scale),
-    )
+    )(mag, arg)
 
 
 # def magnitude_oscillating(zz: ComplexPlane) -> Image:
