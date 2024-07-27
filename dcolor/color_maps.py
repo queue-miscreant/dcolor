@@ -5,6 +5,8 @@ from matplotlib.colors import hsv_to_rgb
 import numpy as np
 import numpy.typing as npt
 
+__all__ = ["magnitude_oscillating", "raw_magnitude_oscillating", "green_magnitude"]
+
 ComplexPlane = TypeAliasType(
     "ComplexPlane", np.ndarray[Literal[2], np.dtype[np.complexfloating]]
 )  # 2D representation of the complex plane
