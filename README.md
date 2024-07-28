@@ -48,8 +48,12 @@ import dcolor
 import matplotlib.pyplot as plt
 
 plt.title("$f(z) = \\frac{(z^2 - 1)(z - 2 - 1j)^2}{z^2 +2+ 2j}$")
-dcolor.plot(lambda z : ((z**2 - 1)*(z - 2 - 1j)**2)/(z**2 + 2 + 2j))
-plt.show()
+dcolor.dcolor(
+  lambda z : ((z**2 - 1)*(z - 2 - 1j)**2)/(z**2 + 2 + 2j),
+  xlim=(-8, 8),
+  ylim=(-8, 8),
+)
+# plt.show() called implicitly
 ```
 
 ## Examples

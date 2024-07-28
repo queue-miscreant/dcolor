@@ -1,4 +1,4 @@
-from .dcolor import plot, ComplexFunction
+from .dcolor import dcolor, ComplexFunction
 from .color_maps import (
     magnitude_oscillating,
     raw_magnitude_oscillating,

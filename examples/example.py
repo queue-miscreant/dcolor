@@ -86,7 +86,13 @@ ALL_GROUPS = [LINEAR_PLOTS, POLYNOMIAL_PLOTS, ALGEBRAIC_PLOTS, SPECIAL_PLOTS]
 def plot_one(plot: DomainPlot, color_map, file=None):
     """Plot an example plot"""
     plt.gcf().clear()
-    dcolor.plot(plot.function, cmap=color_map)
+    dcolor.plot(
+        plot.function,
+        xlim=(-8, 8),
+        ylim=(-8, 8),
+        cmap=color_map,
+        show=False,
+    )
     plt.title(plot.title)
     plt.tight_layout()
 
@@ -104,7 +110,14 @@ def plot_group(group: DomainPlotGroup, color_map, file=None):
             print(f"Omitting plot {i} for {plot.title}")
             continue
         plt.subplot(2 if len(group.plots) > 3 else 1, 3, i + 1)
-        dcolor.plot(plot.function, cmap=color_map)
+
+        dcolor.plot(
+            plot.function,
+            xlim=(-8, 8),
+            ylim=(-8, 8),
+            cmap=color_map,
+            show=False,
+        )
         plt.title(plot.title)
 
     plt.tight_layout()
@@ -190,6 +203,7 @@ def main():
         "--color-map",
         metavar="COLOR_MAP",
         choices=color_maps,
+        default="magnitude_oscillating",
         help="The color map to use. Available options are: " + ", \n".join(color_maps),
     )
     parser.add_argument(
@@ -207,7 +221,7 @@ def main():
         assert callable(color_map)
     except:
         print(
-            "No color map specified with `-c`. Available options are:"
+            "Bad color map specified with `-c`. Available options are:"
             + ", \n".join(color_maps)
         )
         sys.exit(1)

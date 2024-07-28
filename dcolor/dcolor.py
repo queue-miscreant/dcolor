@@ -16,11 +16,7 @@ ComplexFunction = TypeAliasType(
 
 
 def _make_domain(
-    xmin: float,
-    xmax: float,
-    ymin: float,
-    ymax: float,
-    samples: int
+    xmin: float, xmax: float, ymin: float, ymax: float, samples: int
 ) -> color_maps.ComplexPlane:
     """Create the domains for Real (x) and Imaginary (y) values respectively"""
     x = np.linspace(xmin, xmax, samples)
@@ -86,9 +82,10 @@ class _DColor:
     def plot(
         self,
         axes: Optional[Axes] = None,
-        xlim: Tuple[float, float] = (-8.0, 8.0),
-        ylim: Tuple[float, float] = (-8.0, 8.0),
+        xlim: Optional[Tuple[float, float]] = None,
+        ylim: Optional[Tuple[float, float]] = None,
         grid: bool = True,
+        show: bool = True,
     ):
         """
         Plot the contained function on the given boundaries, add axis labels and add gridlines.
@@ -99,8 +96,10 @@ class _DColor:
         else:
             self.axes = axes
 
-        axes.set_xlim(xlim)
-        axes.set_ylim(ylim)
+        if xlim is not None:
+            axes.set_xlim(xlim)
+        if ylim is not None:
+            axes.set_ylim(ylim)
 
         self._plot()
 
@@ -111,15 +110,20 @@ class _DColor:
         if grid:
             axes.grid(True, which="both", linestyle="dashed")
 
-def plot(
+        if show:
+            plt.show()
+
+
+def dcolor(
     f: ComplexFunction,
     *,
     axes: Optional[Axes] = None,
-    xlim: Tuple[float, float] = (-8.0, 8.0),
-    ylim: Tuple[float, float] = (-8.0, 8.0),
+    xlim: Optional[Tuple[float, float]] = None,
+    ylim: Optional[Tuple[float, float]] = None,
     cmap: color_maps.ComplexColorMap = color_maps.magnitude_oscillating,
     samples: int = 1000,
     grid: bool = True,
+    show: bool = True,
 ) -> _DColor:
     """Plot a complex-valued function `f`. By default, this uses the current matplotlib axes.
     Note that the current figure's DPI settings will be used to draw the image.
@@ -144,15 +148,12 @@ def plot(
 
     `grid` --       Whether or not to draw gridlines at the tick positions. Defaults To true.
     """
-    ret = _DColor(
-        f,
-        cmap=cmap,
-        samples=samples
-    )
+    ret = _DColor(f, cmap=cmap, samples=samples)
     ret.plot(
         axes=axes,
         xlim=xlim,
         ylim=ylim,
-        grid=grid
+        grid=grid,
+        show=show,
     )
     return ret
