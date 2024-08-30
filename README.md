@@ -69,7 +69,7 @@ same function from the usage section:
 python examples/example.py -s algebraic.3 -c {METHOD}
 ```
 
-Note that this script may not function outside of the poetry virtual environment.
+Note that this script may not function outside of the Poetry virtual environment.
 
 ### Default method (magnitude_oscillating)
 

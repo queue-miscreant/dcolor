@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+"""
+dcolor.dcolor
+
+Module providing main domain coloring functionality.
+"""
 from typing import Callable, Optional, Tuple
 from typing_extensions import TypeAliasType
 
@@ -25,7 +29,7 @@ def _make_domain(
     return xx + 1j * yy
 
 
-class _DColor:
+class DColor:
     """
     A wrapper object around a complex function for plotting using matplotlib.
 
@@ -37,7 +41,7 @@ class _DColor:
                     The default is `dcolor.cmap.magnitude_oscillating`
 
     `samples` --    The number of samples along each axis to use for plotting.
-                    Note that the square of this value is how many values are actually calculated.
+                    The square of this value is how many values are actually calculated.
     """
 
     def __init__(
@@ -74,9 +78,9 @@ class _DColor:
         xmin, xmax = self.axes.get_xlim()
         ymin, ymax = self.axes.get_ylim()
 
+        # Call, color, and plot the image on the current axes limits
         zz = self._function(_make_domain(xmin, xmax, ymin, ymax, self._samples))
         rgb = self._cmap(zz)
-        # Plot the image with y extents backwards
         self.axes.imshow(rgb, origin="lower", extent=(xmin, xmax, ymin, ymax))
 
     def plot(
@@ -88,7 +92,7 @@ class _DColor:
         show: bool = True,
     ):
         """
-        Plot the contained function on the given boundaries, add axis labels and add gridlines.
+        Plot the contained function on the given boundaries, add axis labels, and add gridlines.
         """
         if axes is None:
             self.axes = plt.gca()
@@ -124,8 +128,10 @@ def dcolor(
     samples: int = 1000,
     grid: bool = True,
     show: bool = True,
-) -> _DColor:
-    """Plot a complex-valued function `f`. By default, this uses the current matplotlib axes.
+) -> DColor:
+    """
+    Plot a complex-valued function `f`. By default, this uses the current matplotlib axes.
+
     Note that the current figure's DPI settings will be used to draw the image.
     If this matters to you, call `Figure.set_dpi` beforehand.
 
@@ -135,9 +141,11 @@ def dcolor(
     Optional keyword arguments:
     `axes` --       The matplotlib axes on which to plot. Defaults to the current axes.
 
-    `xlim` --       The x (real) limits to use when plotting
+    `xlim` --       The x (real) limits to use when plotting.
+                    If absent, prior values from `xlim()` are respected.
 
     `ylim` --       The y (imaginary) limits to use when plotting
+                    If absent, prior values from `ylim()` are respected.
 
     `cmap` --       A function which converts a complex number to an RGB color
                     (or an array of the former to an array of the latter).
@@ -146,9 +154,11 @@ def dcolor(
     `samples` --    The number of samples along each axis to use for plotting.
                     Note that the square of this value is how many values are actually calculated.
 
-    `grid` --       Whether or not to draw gridlines at the tick positions. Defaults To true.
+    `grid` --       Whether to draw gridlines at the tick positions. Defaults to True.
+
+    `show` --       Whether to show the plot with Matplotlib. Defaults to True.
     """
-    ret = _DColor(f, cmap=cmap, samples=samples)
+    ret = DColor(f, cmap=cmap, samples=samples)
     ret.plot(
         axes=axes,
         xlim=xlim,

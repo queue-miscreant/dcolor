@@ -1,3 +1,9 @@
+"""
+dcolor.color_maps
+
+Module providing complex color maps used in domain coloring.
+These functions take a 2D array of complex values and convert them to RGB triples.
+"""
 from typing import Callable, Literal
 from typing_extensions import TypeAlias, TypeAliasType
 
@@ -30,8 +36,8 @@ def magnitude_oscillating(zz: ComplexPlane) -> Image:
     Converts a complex 2D array `zz` to an RGB image with normal domain coloring.
 
     Hue is taken from the complex argument of `zz`.
-    Saturation and value covary with the logarithm of the magnitude of `zz`,
-    effectively giving logarithmic countours.
+    Saturation and value vary with the logarithm of the magnitude of `zz`,
+    giving the appearance of logarithmic countours.
     """
     H = (np.angle(zz) % (2.0 * np.pi)) / (2.0 * np.pi)  # Hue determined by arg(z)
     r = np.log2(1.0 + np.abs(zz))
@@ -44,10 +50,9 @@ def magnitude_oscillating(zz: ComplexPlane) -> Image:
 def raw_magnitude_oscillating(zz: ComplexPlane) -> Image:
     """
     Converts a complex 2D array `zz` to an RGB image.
-    Similar to `magnitude_oscillating`, but with a "rawer" conversion to RGB.
 
-    Generally similar to `magnitude_oscillating`, with R as hue,
-    G as saturation, and B as value.
+    Same as `magnitude_oscillating`, but with a "rawer" conversion to RGB,
+    rather than going through matplotlib.colors
     """
     h = normalize(np.angle(zz) % (2.0 * np.pi))  # Hue determined by arg(z)
     r = np.log2(1.0 + np.abs(zz))
